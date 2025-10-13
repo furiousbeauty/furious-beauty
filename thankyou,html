@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thank You - Furious Beauty</title>
+<style>
+  html, body { margin:0; padding:0; font-family:Arial,sans-serif; min-height:100vh; display:flex; flex-direction:column; }
+  main { flex:1; display:flex; justify-content:center; align-items:center; background:#f9f9f9; text-align:center; }
+
+  h1 { color:#e91176; font-size:36px; font-weight:bold; }
+  p { font-size:20px; margin-top:15px; }
+
+  footer { background:#111; color:white; text-align:center; padding:10px 20px; }
+  footer a { color:white; margin:0 10px; text-decoration:none; font-weight:bold; }
+  footer a:hover { color:rgb(238,39,99); }
+</style>
+</head>
+<body>
+
+<main>
+  <div>
+    <h1 id="thank-you">Thank You!</h1>
+    <p>Your order has been received. We will contact you shortly.</p>
+  </div>
+</main>
+
+<footer>
+  <p>&copy; 2025 Furious Beauty. All rights reserved.</p>
+  <p>
+    <a href="https://www.instagram.com/furiousbeautyy" target="_blank">Instagram</a>
+    <a href="https://www.tiktok.com/@furious.beautyy" target="_blank">TikTok</a>
+  </p>
+</footer>
+
+<script>
+  // Get first name from localStorage if saved during checkout
+  const firstName = localStorage.getItem('furiousFirstName');
+  if(firstName){
+    document.getElementById('thank-you').textContent = `Thank You, ${firstName}!`;
+    localStorage.removeItem('furiousFirstName'); // clear after showing
+  }
+
+localStorage.setItem('furiousFirstName', document.getElementById('firstName').value);
+window.location.href = 'thankyou.html';
+</script>
+</body>
+</html>
