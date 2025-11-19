@@ -10,7 +10,7 @@ main { flex:1; }
 
 /* Header */
 header { background:#111; color:white; padding: 30px; display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:100; }
-header h1 { font-family:'Playfair Display', serif; font-size:  48px;; margin:0; }
+header h1 { font-family:'Playfair Display', serif; font-size:  48px; margin:0; }
 nav { display:flex; align-items:center; }
 nav a { color:white; margin-left:15px; text-decoration:none; font-weight:bold; position:relative; }
 nav a:hover { color:rgb(238,39,99); }
@@ -48,7 +48,7 @@ nav a:hover { color:rgb(238,39,99); }
 }
 #mini-cart-dropdown .item span:first-child {
     color:#e91176; 
-    font-weight:bold; /* product name in pink and bold */
+    font-weight:bold;
 }
 #mini-cart-dropdown .item button { 
     margin-left:5px; 
@@ -96,10 +96,27 @@ nav a:hover { color:rgb(238,39,99); }
 .products { display:flex; justify-content:center; gap:40px; padding:50px 20px; flex-wrap:wrap; }
 .product-card { border-radius:10px; padding:30px; text-align:center; width:220px; color:#333; box-shadow:0 8px 15px rgba(0,0,0,0.2); transition:0.3s; background:white; cursor:pointer; }
 .product-card:hover { transform:scale(1.05);}
+.product-card img.product-img { width: 100%; height:220px; object-fit: cover; border-radius: 10px; margin-bottom: 10px; }
 .product-card h3 { margin-bottom:10px; color:#e91176; font-weight:bold; }
 .product-card p { margin-bottom:10px; }
 .product-card button { margin-top:10px; padding:10px 20px; background:#111; color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold; transition:0.3s; }
 .product-card button:hover { background:rgb(238,39,99); color:white; }
+
+/* Responsive */
+@media (max-width:1024px){
+  .product-card { width:45%; padding:30px; }
+  .products { gap:30px; }
+}
+@media (max-width:768px){
+  .product-card { width:100%; padding:30px; }
+  .products { gap:20px; }
+}
+@media (max-width:480px){
+  .product-card img.product-img { height:140px; }
+  .product-card h3 { font-size:1rem; }
+  .product-card p { font-size:0.85rem; }
+  .product-card button { padding:8px 15px; font-size:0.85rem; }
+}
 
 /* Footer */
 footer { background:#111; color:white; text-align:center; padding:10px 20px; }
@@ -132,18 +149,23 @@ footer a:hover { color:rgb(238,39,99); }
 </section>
 
 <section class="products" id="shop">
+
   <div class="product-card" data-name="Sunkissed" data-price="24.99">
+    <img src="sunkissed.jpg" alt="Sunkissed" class="product-img">
     <h3>Sunkissed</h3>
     <p>Gold shimmer body oil – sunkissed glow</p>
     <p>€24.99</p>
     <button onclick="addToCart('Sunkissed',24.99)">Add to Cart</button>
   </div>
+
   <div class="product-card" data-name="Moon Glow" data-price="24.99">
+    <img src="moonglow.jpg" alt="Moon Glow" class="product-img">
     <h3>Moon Glow</h3>
     <p>Silver shimmer body oil – moon shine</p>
     <p>€24.99</p>
     <button onclick="addToCart('Moon Glow',24.99)">Add to Cart</button>
   </div>
+
 </section>
 </main>
 
@@ -227,7 +249,6 @@ document.getElementById('mini-cart-link').addEventListener('click',()=>{
 // Initialize mini cart on page load
 updateMiniCart();
 </script>
-
 
 </body>
 </html>
