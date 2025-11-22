@@ -136,7 +136,7 @@ footer a:hover { color:rgb(238,39,99); }
 </header>
 
 <!-- Discount label -->
-<div class="discount-label"> ✨20% OFF if you buy 2 or more bottles!✨ </div>
+<div class="discount-label"> ✨10% OFF if you buy 2 or more bottles!✨ </div>
 
 <main>
 <section class="hero" id="home">
@@ -212,13 +212,7 @@ function updateMiniCart(){
 
     // Optional: show discount in mini-cart
     if(totalQty>=2){
-        const discountDiv = document.createElement('div');
-        discountDiv.className = 'total';
-        discountDiv.style.color = 'green';
-        const discount = total*0.20;
-        discountDiv.textContent = `Discount (20% off): -€${discount.toFixed(2)}`;
-        dropdown.appendChild(discountDiv);
-        total -= discount;
+        
     }
 
     if(cart.length>0){
