@@ -4,36 +4,53 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Checkout - Furious Beauty</title>
+
+<!-- Select2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
 <style>
-  html, body { margin:0; padding:0; font-family:Arial,sans-serif; min-height:100vh; display:flex; flex-direction:column; }
-  main { flex:1; display:flex; justify-content:center; align-items:flex-start; padding:20px; background:#f9f9f9; }
+html, body { margin:0; padding:0; font-family:Arial,sans-serif; min-height:100vh; display:flex; flex-direction:column; }
+main { flex:1; display:flex; justify-content:center; align-items:flex-start; padding:20px; background:#f9f9f9; }
 
-  /* Header */
-  header { background:#111; color:white; padding:30px; display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:100; }
-  header h1 { font-family:'Playfair Display', serif; font-size:48px; margin:0; }
-  nav a { color:white; margin-left:15px; text-decoration:none; font-weight:bold; }
-  nav a:hover { color:rgb(238,39,99); }
+/* Header */
+header { background:#111; color:white; padding:30px; display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:100; }
+header h1 { font-family:'Playfair Display', serif; font-size:48px; margin:0; }
+nav a { color:white; margin-left:15px; text-decoration:none; font-weight:bold; }
+nav a:hover { color:rgb(238,39,99); }
 
-  /* Checkout container */
-  .checkout-container { background:#fff; padding:30px; border-radius:10px; box-shadow:0 8px 20px rgba(0,0,0,0.2); width:100%; max-width:600px; }
-  .checkout-container h2 { color:#e91176; text-align:center; margin-bottom:20px; }
+/* Checkout container */
+.checkout-container { background:#fff; padding:30px; border-radius:10px; box-shadow:0 8px 20px rgba(0,0,0,0.2); width:100%; max-width:600px; }
+.checkout-container h2 { color:#e91176; text-align:center; margin-bottom:20px; }
 
-  .checkout-item { display:flex; justify-content:space-between; margin-bottom:10px; font-weight:bold; color:#e91176; font-size:16px; }
-  .checkout-item span { font-weight:normal; color:#111; }
+.checkout-item { display:flex; justify-content:space-between; margin-bottom:10px; font-weight:bold; color:#e91176; font-size:16px; }
+.checkout-item span { font-weight:normal; color:#111; }
 
-  .total, .shipping, .grand-total { font-size:18px; font-weight:bold; margin-top:10px; }
-  .grand-total { color:#e91176; font-size:20px; }
+.total, .shipping, .grand-total, .discount { font-size:18px; font-weight:bold; margin-top:10px; }
+.grand-total { color:#e91176; font-size:20px; }
+.discount { color:green; }
 
-  .form-group { margin-top:15px; display:flex; flex-direction:column; }
-  .form-group label { margin-bottom:5px; font-weight:bold; }
-  .form-group input, .form-group select { padding:10px; border-radius:5px; border:1px solid #ccc; font-size:16px; }
+.form-group { margin-top:15px; display:flex; flex-direction:column; }
+.form-group label { margin-bottom:5px; font-weight:bold; }
+.form-group input, .form-group select { padding:10px; border-radius:5px; border:1px solid #ccc; font-size:16px; }
 
-  #paypal-button-container { margin-top:20px; display:flex; justify-content:center; }
+#country {
+  width: 100% !important;  /* full width */
+  font-size: 16px;
+}
 
-  /* Footer */
-  footer { background:#111; color:white; text-align:center; padding:10px 20px; }
-  footer a { color:white; margin:0 10px; text-decoration:none; font-weight:bold; }
-  footer a:hover { color:rgb(238,39,99); }
+.select2-container { width: 100% !important; }
+
+#paypal-button-container { 
+  margin-top: 30px; 
+  display:flex; 
+  justify-content:center; 
+  clear: both; 
+}
+
+/* Footer */
+footer { background:#111; color:white; text-align:center; padding:10px 20px; }
+footer a { color:white; margin:0 10px; text-decoration:none; font-weight:bold; }
+footer a:hover { color:rgb(238,39,99); }
 </style>
 </head>
 <body>
@@ -54,7 +71,8 @@
 
     <!-- Order items -->
     <div id="checkout-items"></div>
-    <div class="shipping">Shipping: €5.00</div>
+    <div class="shipping" id="shipping">Shipping: €6.00</div>
+    <div class="discount" id="discount" style="display:none;"></div>
     <div class="grand-total" id="grand-total">Total: €0.00</div>
 
     <!-- Customer info form -->
@@ -86,7 +104,7 @@
       </div>
       <div class="form-group">
         <label for="country">Country</label>
-        <input type="text" id="country" name="country" required>
+        <select id="country" name="country" required></select>
       </div>
 
       <input type="hidden" id="order-details" name="order-details">
@@ -105,19 +123,51 @@
   </p>
 </footer>
 
+<!-- jQuery & Select2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
 <!-- PayPal SDK -->
 <script src="https://www.paypal.com/sdk/js?client-id=ARlnnFdoGqsh-6WmEKAX74gQVcUTXb5KMZ6i2EXJPe9astxfz-h8La70GlcHiCknty73B3XE9HW9cYzu&currency=EUR"></script>
 
 <script>
 let cart = JSON.parse(localStorage.getItem('furiousCart')) || [];
 const checkoutItemsDiv = document.getElementById('checkout-items');
-const grandTotalDiv = document.getElementById('grand-total');
-const shippingCost = 5.00;
+const grandTotalDiv = $('#grand-total');
+const discountDiv = $('#discount');
+const shippingDiv = $('#shipping');
+const countrySelect = $('#country');
+
+const countries = ["Afghanistan","Albania","Algeria","Andorra","Angola","Argentina","Armenia","Australia","Austria","Azerbaijan",
+  "Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Bhutan","Bolivia","Bosnia and Herzegovina","Botswana",
+  "Brazil","Brunei","Bulgaria","Burkina Faso","Burundi","Cabo Verde","Cambodia","Cameroon","Canada","Cyprus","Czech Republic",
+  "Denmark","Djibouti","Dominica","Dominican Republic","Ecuador","Egypt","El Salvador","Estonia","Eswatini","Ethiopia",
+  "Finland","France","Germany","Greece","Hungary","Iceland","India","Indonesia","Ireland","Israel","Italy","Japan","Jordan",
+  "Kazakhstan","Kenya","Kuwait","Latvia","Lebanon","Lithuania","Luxembourg","Malta","Mexico","Netherlands","New Zealand",
+  "Norway","Poland","Portugal","Qatar","Romania","Russia","Saudi Arabia","Singapore","Slovakia","Slovenia","South Africa",
+  "Spain","Sweden","Switzerland","Turkey","United Arab Emirates","United Kingdom","United States","Vietnam","Zimbabwe"];
+
+// Populate countries
+countries.forEach(c => { countrySelect.append(new Option(c, c)); });
+
+// Activate Select2 with full width
+countrySelect.select2({ placeholder: "Select your country", allowClear: true, width: 'resolve' });
+
+function updateGrandTotal(shipping){
+  let total = 0, totalQty = 0;
+  cart.forEach(item => { total += item.price * item.qty; totalQty += item.qty; });
+
+  let discount = 0;
+  if(totalQty >= 2){ discount = total * 0.2; total -= discount; discountDiv.show().text(`Discount (20% off): -€${discount.toFixed(2)}`); }
+  else { discountDiv.hide(); }
+
+  const grandTotal = total + shipping;
+  grandTotalDiv.text(`Total: €${grandTotal.toFixed(2)}`);
+}
 
 function updateCheckout() {
   checkoutItemsDiv.innerHTML = '';
-  let total = 0;
-  let orderText = '';
+  let total = 0, orderText = '', totalQty = 0;
 
   cart.forEach(item => {
     const div = document.createElement('div');
@@ -125,17 +175,19 @@ function updateCheckout() {
     div.innerHTML = `${item.name} x ${item.qty} <span>€${(item.price*item.qty).toFixed(2)}</span>`;
     checkoutItemsDiv.appendChild(div);
     total += item.price * item.qty;
+    totalQty += item.qty;
     orderText += `${item.name} x ${item.qty} (€${(item.price*item.qty).toFixed(2)})\n`;
   });
 
-  const grandTotal = total + shippingCost;
-  grandTotalDiv.textContent = `Total: €${grandTotal.toFixed(2)}`;
-  document.getElementById('order-details').value = orderText + `Shipping: €${shippingCost}\nGrand Total: €${grandTotal.toFixed(2)}`;
+  updateGrandTotal(5);  // initial shipping default 5
+  document.getElementById('order-details').value = orderText;
 
   // PayPal button
   paypal.Buttons({
     style: { layout: 'vertical', color: 'gold', shape: 'rect', label: 'paypal' },
     createOrder: function(data, actions) {
+      const shipping = parseFloat(shippingDiv.text().replace('Shipping: €','')) || 0;
+      const grandTotal = total + shipping - (totalQty>=2 ? total*0.2 : 0);
       return actions.order.create({
         purchase_units: [{
           amount: { value: grandTotal.toFixed(2) },
@@ -145,7 +197,6 @@ function updateCheckout() {
     },
     onApprove: function(data, actions) {
       return actions.order.capture().then(function(details) {
-        // Send form data to Formspree
         const formData = new FormData(document.getElementById('checkout-form'));
         fetch('https://formspree.io/f/xgvnngdw', { method: 'POST', body: formData })
           .then(() => {
@@ -157,6 +208,20 @@ function updateCheckout() {
     }
   }).render('#paypal-button-container');
 }
+
+// Shipping calculation on country change
+countrySelect.on('change', function() {
+  const country = $(this).val();
+  let shipping = 20;
+  const euCountries = ["Austria","Belgium","Bulgaria","Croatia","Czech Republic","Denmark","Estonia","Finland",
+                       "France","Germany","Hungary","Ireland","Italy","Latvia","Lithuania","Luxembourg","Malta",
+                       "Netherlands","Poland","Portugal","Romania","Slovakia","Slovenia","Spain","Sweden"];
+  if(country === "Cyprus" || country === "Greece") shipping = 6;
+  else if(euCountries.includes(country)) shipping = 10;
+
+  shippingDiv.text(`Shipping: €${shipping.toFixed(2)}`);
+  updateGrandTotal(shipping);
+});
 
 updateCheckout();
 </script>
