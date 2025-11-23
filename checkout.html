@@ -223,12 +223,12 @@ function updateCheckout() {
 // Shipping calculation on country change
 countrySelect.on('change', function() {
     const country = $(this).val();
-    let shipping = 20;
+    let shipping = 22.99;
     const euCountries = ["Austria","Belgium","Bulgaria","Croatia","Czech Republic","Denmark","Estonia","Finland",
                          "France","Germany","Hungary","Ireland","Italy","Latvia","Lithuania","Luxembourg","Malta",
                          "Netherlands","Poland","Portugal","Romania","Slovakia","Slovenia","Spain","Sweden"];
     if(country === "Cyprus" || country === "Greece") shipping = 6;
-    else if(euCountries.includes(country)) shipping = 10;
+    else if(euCountries.includes(country)) shipping = 14.99;
 
     shippingDiv.text(`Shipping: €${shipping.toFixed(2)}`);
     updateGrandTotal(shipping);
