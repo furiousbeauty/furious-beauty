@@ -125,11 +125,8 @@ footer a:hover { color:rgb(238,39,99); }
   </p>
 </footer>
 
-<!-- jQuery & Select2 JS -->
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
-<!-- PayPal SDK -->
 <script src="https://www.paypal.com/sdk/js?client-id=ARlnnFdoGqsh-6WmEKAX74gQVcUTXb5KMZ6i2EXJPe9astxfz-h8La70GlcHiCknty73B3XE9HW9cYzu&currency=EUR"></script>
 
 <script>
@@ -150,77 +147,85 @@ const countries = ["Afghanistan","Albania","Algeria","Andorra","Angola","Argenti
   "Norway","Poland","Portugal","Qatar","Romania","Russia","Saudi Arabia","Singapore","Slovakia","Slovenia","South Africa",
   "Spain","Sweden","Switzerland","Turkey","United Arab Emirates","United Kingdom","United States","Vietnam","Zimbabwe"];
 
-// Populate countries
+// Populate country select
 countries.forEach(c => { countrySelect.append(new Option(c, c)); });
 countrySelect.select2({ placeholder: "Select your country", allowClear: true, width: 'resolve' });
 
-function updateGrandTotal(shipping){
+// Calculate grand total with discount & shipping
+function calculateGrandTotal() {
     let total = 0, totalQty = 0;
     cart.forEach(item => { total += item.price * item.qty; totalQty += item.qty; });
 
     let discount = 0;
-    if(totalQty >= 2){ 
-        discount = total * 0.1; 
+    if(totalQty >= 2){
+        discount = total * 0.1;
         discountDiv.show().text(`Discount (10% off): -€${discount.toFixed(2)}`);
         originalTotalDiv.show().text(`Original Total: €${total.toFixed(2)}`);
-    } else { 
-        discountDiv.hide(); 
+    } else {
+        discountDiv.hide();
         originalTotalDiv.hide();
     }
 
-    const grandTotal = total - discount + shipping;
-    grandTotalDiv.text(`Total: €${grandTotal.toFixed(2)}`);
+    const shipping = parseFloat(shippingDiv.text().replace('Shipping: €','')) || 0;
+    return total - discount + shipping;
 }
 
+// Display cart items
 function updateCheckout() {
     checkoutItemsDiv.innerHTML = '';
-    let total = 0, orderText = '', totalQty = 0;
+    let orderText = '';
 
     cart.forEach(item => {
         const div = document.createElement('div');
         div.className = 'checkout-item';
         div.innerHTML = `${item.name} x ${item.qty} <span>€${(item.price*item.qty).toFixed(2)}</span>`;
         checkoutItemsDiv.appendChild(div);
-        total += item.price * item.qty;
-        totalQty += item.qty;
         orderText += `${item.name} x ${item.qty} (€${(item.price*item.qty).toFixed(2)})\n`;
     });
 
-    updateGrandTotal(6);  // initial shipping default 6
     document.getElementById('order-details').value = orderText;
-
-    // PayPal button
-    paypal.Buttons({
-        style: { layout: 'vertical', color: 'gold', shape: 'rect', label: 'paypal' },
-        createOrder: function(data, actions) {
-            const shipping = parseFloat(shippingDiv.text().replace('Shipping: €','')) || 0;
-            let total = 0, totalQty = 0;
-            cart.forEach(item => { total += item.price * item.qty; totalQty += item.qty; });
-            let discount = (totalQty >= 2) ? total*0.1 : 0;
-            const grandTotal = total - discount + shipping;
-
-            return actions.order.create({
-                purchase_units: [{
-                    amount: { value: grandTotal.toFixed(2) },
-                    description: 'Furious Beauty order'
-                }]
-            });
-        },
-        onApprove: function(data, actions) {
-            return actions.order.capture().then(function(details) {
-                const formData = new FormData(document.getElementById('checkout-form'));
-                fetch('https://formspree.io/f/xgvnngdw', { method: 'POST', body: formData })
-                .then(() => {
-                    alert(`Thank you ${document.getElementById('firstName').value} for your order!`);
-                    localStorage.removeItem('furiousCart');
-                    window.location.href = 'thankyou.html';
-                });
-            });
-        }
-    }).render('#paypal-button-container');
+    grandTotalDiv.text(`Total: €${calculateGrandTotal().toFixed(2)}`);
 }
 
-// Shipping calculation on country change
+// Generate order number
+function getNextOrderNumber() {
+    let lastOrder = localStorage.getItem('lastOrderNumber') || 0;
+    lastOrder = parseInt(lastOrder) + 1;
+    localStorage.setItem('lastOrderNumber', lastOrder);
+    return lastOrder.toString().padStart(3, '0'); // #001, #002, ...
+}
+
+// PayPal button
+paypal.Buttons({
+    style: { layout: 'vertical', color: 'gold', shape: 'rect', label: 'paypal' },
+    createOrder: function(data, actions) {
+        const grandTotal = calculateGrandTotal();
+        return actions.order.create({
+            purchase_units: [{
+                amount: { value: grandTotal.toFixed(2) },
+                description: 'Furious Beauty order'
+            }]
+        });
+    },
+    onApprove: function(data, actions) {
+        return actions.order.capture().then(function(details) {
+            const buyerName = document.getElementById('firstName').value;
+            const orderNumber = getNextOrderNumber();
+            localStorage.setItem('lastOrderName', buyerName);
+            localStorage.setItem('lastOrderNumberDisplay', orderNumber);
+
+            // Optional: send data to Formspree or your server
+            const formData = new FormData(document.getElementById('checkout-form'));
+            fetch('https://formspree.io/f/xgvnngdw', { method: 'POST', body: formData })
+            .then(() => {
+                localStorage.removeItem('furiousCart');
+                window.location.href = 'thankyou.html';
+            });
+        });
+    }
+}).render('#paypal-button-container');
+
+// Shipping based on country
 countrySelect.on('change', function() {
     const country = $(this).val();
     let shipping = 22.99;
@@ -231,11 +236,12 @@ countrySelect.on('change', function() {
     else if(euCountries.includes(country)) shipping = 14.99;
 
     shippingDiv.text(`Shipping: €${shipping.toFixed(2)}`);
-    updateGrandTotal(shipping);
+    grandTotalDiv.text(`Total: €${calculateGrandTotal().toFixed(2)}`);
 });
 
 updateCheckout();
 </script>
+
 
 </body>
 </html>
