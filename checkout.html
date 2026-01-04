@@ -93,13 +93,15 @@ footer a:hover { color:rgb(238,39,99); }
         <input type="email" id="email" name="email" required>
       </div>
       <div class="form-group">
+  <label for="phone">Phone Number</label>
+  <input type="tel" id="phone" name="phone" required>
+</div>
+
+      <div class="form-group">
         <label for="address">Address</label>
         <input type="text" id="address" name="address" required>
       </div>
-      <div class="form-group">
-        <label for="city">City</label>
-        <input type="text" id="city" name="city" required>
-      </div>
+     
       <div class="form-group">
         <label for="postal">Postal Code</label>
         <input type="text" id="postal" name="postal" required>
@@ -108,7 +110,10 @@ footer a:hover { color:rgb(238,39,99); }
         <label for="country">Country</label>
         <select id="country" name="country" required></select>
       </div>
-
+ <div class="form-group">
+        <label for="city">City</label>
+        <input type="text" id="city" name="city" required>
+      </div>
       <input type="hidden" id="order-details" name="order-details">
     </form>
 
@@ -138,13 +143,13 @@ const originalTotalDiv = $('#original-total');
 const shippingDiv = $('#shipping');
 const countrySelect = $('#country');
 
-const countries = ["Afghanistan","Albania","Algeria","Andorra","Angola","Argentina","Armenia","Australia","Austria","Azerbaijan",
+const countries = [" ","Afghanistan","Albania","Algeria","Andorra","Angola","Argentina","Armenia","Australia","Austria","Azerbaijan",
   "Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Bhutan","Bolivia","Bosnia and Herzegovina","Botswana",
-  "Brazil","Brunei","Bulgaria","Burkina Faso","Burundi","Cabo Verde","Cambodia","Cameroon","Canada","Cyprus","Czech Republic",
-  "Denmark","Djibouti","Dominica","Dominican Republic","Ecuador","Egypt","El Salvador","Estonia","Eswatini","Ethiopia",
-  "Finland","France","Germany","Greece","Hungary","Iceland","India","Indonesia","Ireland","Israel","Italy","Japan","Jordan",
-  "Kazakhstan","Kenya","Kuwait","Latvia","Lebanon","Lithuania","Luxembourg","Malta","Mexico","Netherlands","New Zealand",
-  "Norway","Poland","Portugal","Qatar","Romania","Russia","Saudi Arabia","Singapore","Slovakia","Slovenia","South Africa",
+  "Brazil","Brunei","Bulgaria","Burkina Faso","Burundi","Cabo Verde","Cambodia","Cameroon","Canada","Cyprus","Czech Republic","China","Croatia","Cuba",
+  "Denmark","Djibouti","Dominica","Dominican Republic","Ecuador","Egypt","El Salvador","Estonia","Eswatini","Ethiopia","Fiji",
+  "Finland","France","Georgia","Germany","Greece","Ghana","Hungary","Iceland","India","Indonesia","Ireland","Iran","Israel","Italy","Japan","Jordan","Jamaica",
+  "Kazakhstan","Kenya","Kuwait","Latvia","Lebanon","Lithuania","Luxembourg","Malta","Mexico","Malaysia","Mauritius","Maldives","Moldova","Morocco","Mongolia","Netherlands","New Zealand",
+  "Norway","Nepal","Poland","Oman","Portugal","Qatar","Romania","Russia","Saudi Arabia","Singapore","Slovakia","Slovenia","South Africa",
   "Spain","Sweden","Switzerland","Turkey","United Arab Emirates","United Kingdom","United States","Vietnam","Zimbabwe"];
 
 // Populate country select
@@ -228,12 +233,13 @@ paypal.Buttons({
 // Shipping based on country
 countrySelect.on('change', function() {
     const country = $(this).val();
-    let shipping = 22.99;
+    let shipping = 35;
     const euCountries = ["Austria","Belgium","Bulgaria","Croatia","Czech Republic","Denmark","Estonia","Finland",
                          "France","Germany","Hungary","Ireland","Italy","Latvia","Lithuania","Luxembourg","Malta",
                          "Netherlands","Poland","Portugal","Romania","Slovakia","Slovenia","Spain","Sweden"];
-    if(country === "Cyprus" || country === "Greece") shipping = 6;
-    else if(euCountries.includes(country)) shipping = 14.99;
+    if(country === "Cyprus")  shipping = 6;
+    if(country === "Greece")  shipping = 15;
+    else if(euCountries.includes(country)) shipping = 25;
 
     shippingDiv.text(`Shipping: €${shipping.toFixed(2)}`);
     grandTotalDiv.text(`Total: €${calculateGrandTotal().toFixed(2)}`);
