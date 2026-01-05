@@ -237,9 +237,9 @@ countrySelect.on('change', function() {
     const euCountries = ["Austria","Belgium","Bulgaria","Croatia","Czech Republic","Denmark","Estonia","Finland",
                          "France","Germany","Hungary","Ireland","Italy","Latvia","Lithuania","Luxembourg","Malta",
                          "Netherlands","Poland","Portugal","Romania","Slovakia","Slovenia","Spain","Sweden"];
-    if(country === "Cyprus")  shipping = 6;
-    if(country === "Greece")  shipping = 15;
-    else if(euCountries.includes(country)) shipping = 25;
+    if(country === "Cyprus")  shipping = 6.;
+    if(country === "Greece")  shipping = 8.50;
+    else if(euCountries.includes(country)) shipping = 16.50;
 
     shippingDiv.text(`Shipping: €${shipping.toFixed(2)}`);
     grandTotalDiv.text(`Total: €${calculateGrandTotal().toFixed(2)}`);
