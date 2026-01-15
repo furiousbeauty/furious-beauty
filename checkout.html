@@ -78,7 +78,8 @@ footer a:hover { color:rgb(238,39,99); }
     <div class="grand-total" id="grand-total">Total: €0.00</div>
 
     <!-- Customer info form -->
-    <h3>Customer Info</h3>
+    
+<h3>Customer Info</h3>
     <form id="checkout-form">
       <div class="form-group">
         <label for="firstName">First Name</label>
@@ -116,6 +117,7 @@ footer a:hover { color:rgb(238,39,99); }
       </div>
       <input type="hidden" id="order-details" name="order-details">
     </form>
+      
 
     <!-- PayPal button -->
     <div id="paypal-button-container"></div>
@@ -132,7 +134,7 @@ footer a:hover { color:rgb(238,39,99); }
 
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-<script src="https://www.paypal.com/sdk/js?client-id=ARlnnFdoGqsh-6WmEKAX74gQVcUTXb5KMZ6i2EXJPe9astxfz-h8La70GlcHiCknty73B3XE9HW9cYzu&currency=EUR"></script>
+<script src="https://www.paypal.com/sdk/js?client-id=Ac_zgx3s-K3qkJzVBKMRf6nGYHs6LEox6Aj_TfqEmokVHOFu4NzKcLrl08md3xhBOe8J7PeFs7VmeUiD&currency=EUR"></script>
 
 <script>
 let cart = JSON.parse(localStorage.getItem('furiousCart')) || [];
