@@ -221,15 +221,37 @@ async function saveOrderToSupabase(orderData) {
 paypal.Buttons({
   style: { layout: 'vertical', color: 'gold', shape: 'rect', label: 'paypal' },
 
-  createOrder: function(data, actions) {
-    const grandTotal = calculateGrandTotal();
-    return actions.order.create({
-      purchase_units: [{
-        amount: { value: grandTotal.toFixed(2) },
-        description: 'Furious Beauty order'
-      }]
-    });
-  },
+ createOrder: function(data, actions) {
+  const grandTotal = calculateGrandTotal();
+
+  // Build item list for PayPal
+  const items = cart.map(item => ({
+    name: item.name,
+    unit_amount: {
+      currency_code: "EUR",
+      value: item.price.toFixed(2)
+    },
+    quantity: item.qty.toString()
+  }));
+
+  return actions.order.create({
+    purchase_units: [{
+      amount: {
+        currency_code: "EUR",
+        value: grandTotal.toFixed(2),
+        breakdown: {
+          item_total: {
+            currency_code: "EUR",
+            value: grandTotal.toFixed(2)
+          }
+        }
+      },
+      items: items,
+      description: "Furious Beauty order"
+    }]
+  });
+},
+
 
   onApprove: function(data, actions) {
     return actions.order.capture().then(function(details) {
