@@ -117,6 +117,8 @@ footer a:hover { color:rgb(238,39,99); }
       </div>
       <input type="hidden" id="order-details" name="order-details">
     </form>
+    
+
       
 
     <!-- PayPal button -->
@@ -135,8 +137,10 @@ footer a:hover { color:rgb(238,39,99); }
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="https://www.paypal.com/sdk/js?client-id=Ac_zgx3s-K3qkJzVBKMRf6nGYHs6LEox6Aj_TfqEmokVHOFu4NzKcLrl08md3xhBOe8J7PeFs7VmeUiD&currency=EUR"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
+
 let cart = JSON.parse(localStorage.getItem('furiousCart')) || [];
 const checkoutItemsDiv = document.getElementById('checkout-items');
 const grandTotalDiv = $('#grand-total');
@@ -201,36 +205,70 @@ function getNextOrderNumber() {
     localStorage.setItem('lastOrderNumber', lastOrder);
     return lastOrder.toString().padStart(3, '0'); // #001, #002, ...
 }
+const SUPABASE_URL = "https://kcehfrxqjisljynooyzc.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtjZWhmcnhxamlzbGp5bm9veXpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg4MjUzMDMsImV4cCI6MjA4NDQwMTMwM30.kEW6xQdMZjUDuyoP5zt0TsuqsAdLsYoWV5INTh5Wfak";
+
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+async function saveOrderToSupabase(orderData) {
+  const { error } = await supabaseClient.from("orders").insert([orderData]);
+  if (error) {
+    console.error("Supabase insert error:", error);
+  }
+}
 
 // PayPal button
 paypal.Buttons({
-    style: { layout: 'vertical', color: 'gold', shape: 'rect', label: 'paypal' },
-    createOrder: function(data, actions) {
-        const grandTotal = calculateGrandTotal();
-        return actions.order.create({
-            purchase_units: [{
-                amount: { value: grandTotal.toFixed(2) },
-                description: 'Furious Beauty order'
-            }]
-        });
-    },
-    onApprove: function(data, actions) {
-        return actions.order.capture().then(function(details) {
-            const buyerName = document.getElementById('firstName').value;
-            const orderNumber = getNextOrderNumber();
-            localStorage.setItem('lastOrderName', buyerName);
-            localStorage.setItem('lastOrderNumberDisplay', orderNumber);
+  style: { layout: 'vertical', color: 'gold', shape: 'rect', label: 'paypal' },
 
-            // Optional: send data to Formspree or your server
-            const formData = new FormData(document.getElementById('checkout-form'));
-            fetch('https://formspree.io/f/xgvnngdw', { method: 'POST', body: formData })
-            .then(() => {
-                localStorage.removeItem('furiousCart');
-                window.location.href = 'thankyou.html';
-            });
-        });
-    }
+  createOrder: function(data, actions) {
+    const grandTotal = calculateGrandTotal();
+    return actions.order.create({
+      purchase_units: [{
+        amount: { value: grandTotal.toFixed(2) },
+        description: 'Furious Beauty order'
+      }]
+    });
+  },
+
+  onApprove: function(data, actions) {
+    return actions.order.capture().then(function(details) {
+
+      const buyerName = document.getElementById('firstName').value;
+      const orderNumber = getNextOrderNumber();
+
+      // Save to local storage
+      localStorage.setItem('lastOrderName', buyerName);
+      localStorage.setItem('lastOrderNumberDisplay', orderNumber);
+
+      // ✅ Save to Supabase
+      const orderData = {
+        order_number: orderNumber,
+        status: "paid",
+        first_name: document.getElementById("firstName").value,
+        last_name: document.getElementById("lastName").value,
+        email: document.getElementById("email").value,
+        phone: document.getElementById("phone").value,
+        address: document.getElementById("address").value,
+        city: document.getElementById("city").value,
+        postal: document.getElementById("postal").value,
+        country: document.getElementById("country").value,
+        order_details: document.getElementById("order-details").value,
+        paypal_order_id: data.orderID
+      };
+
+      saveOrderToSupabase(orderData);
+
+      // Redirect
+      localStorage.removeItem('furiousCart');
+      window.location.href = 'thankyou.html';
+    });
+  }
+
 }).render('#paypal-button-container');
+
+
+
 
 // Shipping based on country
 countrySelect.on('change', function() {
